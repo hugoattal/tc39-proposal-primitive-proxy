@@ -14,7 +14,7 @@ There are two solutions:
 
 A primitive proxy would allow to set and get a reactive variable seemlessly, here's an example:
 
-```ts
+```js
 // React
 const [myReactVar, setMyReactVar] = useState("");
 setMyReactVar("Hello world");
@@ -35,7 +35,7 @@ console.log(myPrimitiveVar);
 
 Here is a possible implementation inspired by the [Proxy object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy), but without the prop argument of the handler `get` and `set`.
 
-```ts
+```js
 let myVar = new PrimitiveProxy({ storedValue: "" }, {
     set: (target, value) => {
         target.storedValue = value + " world";
@@ -47,4 +47,94 @@ let myVar = new PrimitiveProxy({ storedValue: "" }, {
 
 myVar = "Hello";
 console.log(myVar); // Hello world !
+```
+
+## Questions
+
+### Isn't it confusing not to be able to reassign a variable?
+
+It's the same thing as standard Proxy. Setting a value to `myObject.thing` doesn't not necesarry mean that the `thing` property of `myObject` contains the set value, if the object is behind a Proxy.
+
+### Why using a `let` instead of a `const`?
+
+For consistency, `const` should not be updatable. So a `const` Primitive Proxy should disable the `set` handler.
+
+### How to unproxify a primitive proxy?
+
+Simply reassign it like this:
+```js
+let a = new PrimitiveProxy(...);
+let b = a; // b is a standard primitive
+```
+
+### How to unproxify a primitive proxy while keeping the same variable?
+
+We could do something like this:
+```js
+let a = new PrimitiveProxy(...);
+let temp = a;
+delete a;
+let a = temp; // a is now a standard primitive
+```
+
+Or we can imagine a `removePrimitiveProxy` function:
+
+```js
+let a = new PrimitiveProxy(...);
+removePrimitiveProxy(a); // a is now a standard primitive
+```
+
+### How to copy a primitive proxy?
+
+You wrap it into another primitive proxy:
+```js
+let a = new PrimitiveProxy(...);
+let b = new PrimitiveProxy(null, {
+    set: (_target, value) => {
+        a = value;
+    },
+    get: (_target) => {
+        return a;
+    }
+})
+```
+
+Or we can imagine a `clonePrimitiveProxy` function:
+```js
+let a = new PrimitiveProxy(...);
+let b = clonePrimitiveProxy(a);
+```
+
+### What happens when passing a Primitive Proxy to a function?
+
+When passed to a function, a Primitive Proxy is copied like a standard primitive. If you want to pass the Primitive Proxy to a function, you must wrap it into an object.
+
+```js
+let myVar = new PrimitiveProxy({storedValue: ""}, {
+    set: (target, value) => {
+        target.storedValue = value;
+    },
+    get: (target) => {
+        return "primitive:" + target.storedValue;
+    }
+});
+
+myVar = "Hello";
+console.log(myVar); // primitive:Hello
+
+((value) => { // here, value is a standard primitive
+    console.log(value); // primitive:Hello
+    value = "test";
+    console.log(value); // test
+})(myVar);
+
+console.log(myVar); // primitive:Hello
+
+(({ myVar }) => { // here, myVar is still proxy primitive
+    console.log(myVar); // primitive:Hello
+    myVar = "test";
+    console.log(myVar); // primitive:test
+})({ myVar });
+
+console.log(myVar); // primitive:test
 ```
