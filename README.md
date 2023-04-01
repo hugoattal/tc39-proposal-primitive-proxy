@@ -49,6 +49,8 @@ myVar = "Hello";
 console.log(myVar); // Hello world !
 ```
 
+Here, `storedValue` is just for example purpose. The first argument of `PrimitiveProxy` is an object where you can store values that can be accessed with the `target` argument of `set` and `get`.
+
 ## Questions
 
 ### Isn't it confusing not to be able to reassign a variable?
