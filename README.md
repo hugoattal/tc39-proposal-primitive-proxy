@@ -68,22 +68,10 @@ let b = new PrimitiveProxy(null, {
 })
 ```
 
-This could be simplified with a `PrimitiveProxy.protoype.clone` function:
+This could be simplified with a `PrimitiveProxy.protoype.proxyOf` function:
 ```js
 let a = new PrimitiveProxy(...);
-let b = a.clone();
-```
-
-### `PrimitiveProxy.prototype.delete`
-
-Deleting a Primitive Proxy is not as simple as assigning `undefined` to it, because it would just trigger the setter of the Primitive Proxy.
-
-This could be done using a `PrimitiveProxy.prototype.delete` function:
-
-```js
-let a = new PrimitiveProxy(...);
-a.delete();
-console.log(a); // undefined
+let b = a.proxyOf();
 ```
 
 ## Questions
@@ -104,19 +92,9 @@ let a = new PrimitiveProxy(...);
 let b = a; // b is a standard primitive
 ```
 
-### How to unproxify a primitive proxy while keeping the same variable?
-
-We could do something like this:
-```js
-let a = new PrimitiveProxy(...);
-let temp = a;
-a.delete()
-let a = temp; // a is now a standard primitive
-```
-
 ### What happens when passing a Primitive Proxy to a function?
 
-When passed to a function, a Primitive Proxy is copied like a standard primitive. If you want to pass the Primitive Proxy to a function, you must wrap it into an object.
+When passed to a function, the value of the Primitive Proxy getter is copied. If you want to pass the raw Primitive Proxy to a function, you must wrap it into an object using `proxyOf`.
 
 ```js
 let a = new PrimitiveProxy({storedValue: ""}, {
@@ -143,7 +121,7 @@ console.log(a); // primitive:Hello
     console.log(value); // primitive:Hello
     value = "test";
     console.log(value); // primitive:test
-})({ value: a.clone });
+})({ value: a.proxyOf });
 
 console.log(a); // primitive:test
 ```
