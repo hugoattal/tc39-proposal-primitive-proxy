@@ -12,7 +12,7 @@ There are two solutions:
 - React-like reactive properties use a getter to get the variable, and a function to set it.
 - Vue-like reactive properties wrap the variable into a [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy), where the value can be set and get using the `value` property.
 
-A primitive proxy would allow to set and get a reactive variable seemlessly, here's an example:
+A primitive proxy would allow setting and getting a reactive variable seamlessly, here's an example:
 
 ```js
 // React
@@ -78,7 +78,7 @@ let b = a.proxyOf();
 
 ### Isn't it confusing not to be able to reassign a variable?
 
-It's the same thing as standard Proxy. Setting a value to `myObject.thing` doesn't not necesarry mean that the `thing` property of `myObject` contains the set value, if the object is behind a Proxy.
+It's the same thing as standard Proxy. Setting a value to `myObject.thing` does not necessary mean that the `thing` property of `myObject` contains the set value, if the object is behind a Proxy.
 
 ### Why using a `let` instead of a `const`?
 
