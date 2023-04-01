@@ -51,29 +51,6 @@ console.log(myVar); // Hello world !
 
 Here, `storedValue` is just for example purpose. The first argument of `PrimitiveProxy` is an object where you can store values that can be accessed with the `target` argument of `set` and `get`.
 
-### `PrimitiveProxy.prototype.proxyOf`
-
-Cloning a Primitive Proxy into another variable is not as simple as just assigning it to another variable, because it would just return a standard primitive using the getter of the Primitive Proxy.
-
-So you would need to wrap it into another primitive proxy like this:
-```js
-let a = new PrimitiveProxy(...);
-let b = new PrimitiveProxy(null, {
-    set: (_target, value) => {
-        a = value;
-    },
-    get: (_target) => {
-        return a;
-    }
-})
-```
-
-This could be simplified with a `PrimitiveProxy.protoype.proxyOf` function:
-```js
-let a = new PrimitiveProxy(...);
-let b = a.proxyOf();
-```
-
 ## Questions
 
 ### Isn't it confusing not to be able to reassign a variable?
@@ -86,15 +63,15 @@ For consistency, `const` should not be updatable. So a `const` Primitive Proxy s
 
 ### How to unproxify a primitive proxy?
 
-Simply reassign it like this:
+Simply use the [`valueOf`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/valueOf) function it like this:
 ```js
 let a = new PrimitiveProxy(...);
-let b = a; // b is a standard primitive
+let b = a.valueOf(); // b is a standard primitive
 ```
 
 ### What happens when passing a Primitive Proxy to a function?
 
-When passed to a function, the value of the Primitive Proxy getter is copied. If you want to pass the raw Primitive Proxy to a function, you must wrap it into an object using `proxyOf`.
+When passed to a function, the Primitive Proxy reference is copied just like an object.
 
 ```js
 let a = new PrimitiveProxy({storedValue: ""}, {
@@ -112,16 +89,36 @@ console.log(a); // primitive:Hello
 ((value) => { // here, value is a standard primitive
     console.log(value); // primitive:Hello
     value = "test";
-    console.log(value); // test
+    console.log(value); // primitive:test
 })(a);
 
-console.log(a); // primitive:Hello
-
-(({ value }) => { // here, value is a proxy primitive
-    console.log(value); // primitive:Hello
-    value = "test";
-    console.log(value); // primitive:test
-})({ value: a.proxyOf });
-
 console.log(a); // primitive:test
+```
+
+### So, when is getter called?
+
+The getter is called when the primitive value of the Primitive Proxy is needed.
+
+Here are some examples:
+```js
+let a = new PrimitiveProxy({storedValue: ""}, {
+    set: (target, value) => {
+        console.log("set");
+        target.storedValue = value;
+    },
+    get: (target) => {
+        console.log("get");
+        return target.storedValue;
+    }
+});
+
+a = 5 // set
+
+console.log(a) // get
+
+const b = a; // copy Primitive Proxy
+const c = a + 5 // get
+const d = 5 + a // get
+const e = "Hello" + a // get
+const f = (a === 5) // get
 ```
