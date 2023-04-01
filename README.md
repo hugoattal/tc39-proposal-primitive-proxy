@@ -46,10 +46,24 @@ let myVar = new PrimitiveProxy({ storedValue: "" }, {
 });
 
 myVar = "Hello";
-console.log(myVar); // Hello world !
+console.log(myVar); // "Hello world !"
 ```
 
 Here, `storedValue` is just for example purpose. The first argument of `PrimitiveProxy` is an object where you can store values that can be accessed with the `target` argument of `set` and `get`.
+
+## API details
+
+The `PrimitiveProxy` constructor takes two arguments: `target` and `handler`. `target` is an object to store values, and `handler` is an object containing the methods to intercept the operations performed on the target. The handler object can have `get` and `set` methods, which will be called when the target is accessed or modified.
+
+```ts
+PrimitiveProxy<TTarget, TPrimitive>(
+    target: TTarget,
+    handler: {
+        set: (target: TTarget, value: TPrimitive) => void
+        get: (target: TTarget) => TPrimitive
+    }
+);
+```
 
 ## Questions
 
@@ -84,15 +98,15 @@ let a = new PrimitiveProxy({storedValue: ""}, {
 });
 
 a = "Hello";
-console.log(a); // primitive:Hello
+console.log(a); // "primitive:Hello"
 
-((value) => { // here, value is a standard primitive
-    console.log(value); // primitive:Hello
+((value) => {
+    console.log(value); // "primitive:Hello"
     value = "test";
-    console.log(value); // primitive:test
+    console.log(value); // "primitive:test"
 })(a);
 
-console.log(a); // primitive:test
+console.log(a); // "primitive:test"
 ```
 
 ### So, when is getter called?
@@ -122,3 +136,70 @@ const d = 5 + a // get
 const e = "Hello" + a // get
 const f = (a === 5) // get
 ```
+
+## Additional examples
+
+Seamless date formatting
+
+```js
+const date = new PrimitiveProxy(new Date(), {
+  set: (target, value) => {
+    target.setTime(value.getTime());
+  },
+  get: (target) => {
+    const year = target.getFullYear();
+    const month = target.getMonth() + 1;
+    const day = target.getDate();
+    return `${year}-${month}-${day}`;
+  }
+});
+
+date = new Date("2023-04-01");
+console.log(date); // "2023-04-01"
+```
+
+Seamless data validation
+
+```js
+const input = new PrimitiveProxy("", {
+  set: (target, value) => {
+    if (value > 10) {
+      throw new Error("Input must be 10 characters or less.");
+    }
+    target = value;
+  },
+  get: (target) => {
+    return target;
+  }
+})
+
+try {
+  input = "12345678901";
+} catch (error) {
+  console.error(error); // "Input must be 10 characters or less."
+}
+
+console.log(input); // ""
+```
+
+Seamless number rounding
+
+```js
+const number = new PrimitiveProxy(0, {
+  set: (target, value) => {
+    target = Math.round(value);
+  },
+  get: (target) => {
+    return target;
+  }
+});
+
+number = 3.14159;
+console.log(number); // 3
+```
+
+## Limitations and Drawbacks
+
+One potential limitation is that it may have performance implications. Proxies can be slower than direct property access, so using Primitive Proxies extensively in performance-critical code could lead to slower execution times.
+
+Additionally, the proposal may introduce confusion or unexpected behavior when developers are not aware of the differences between Primitive Proxies and standard primitive types.
