@@ -51,7 +51,7 @@ console.log(myVar); // Hello world !
 
 Here, `storedValue` is just for example purpose. The first argument of `PrimitiveProxy` is an object where you can store values that can be accessed with the `target` argument of `set` and `get`.
 
-### `PrimitiveProxy.prototype.clone`
+### `PrimitiveProxy.prototype.proxyOf`
 
 Cloning a Primitive Proxy into another variable is not as simple as just assigning it to another variable, because it would just return a standard primitive using the getter of the Primitive Proxy.
 
