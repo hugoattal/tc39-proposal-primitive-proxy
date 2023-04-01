@@ -51,6 +51,41 @@ console.log(myVar); // Hello world !
 
 Here, `storedValue` is just for example purpose. The first argument of `PrimitiveProxy` is an object where you can store values that can be accessed with the `target` argument of `set` and `get`.
 
+### `PrimitiveProxy.prototype.clone`
+
+Cloning a Primitive Proxy into another variable is not as simple as just assigning it to another variable, because it would just return a standard primitive using the getter of the Primitive Proxy.
+
+So you would need to wrap it into another primitive proxy like this:
+```js
+let a = new PrimitiveProxy(...);
+let b = new PrimitiveProxy(null, {
+    set: (_target, value) => {
+        a = value;
+    },
+    get: (_target) => {
+        return a;
+    }
+})
+```
+
+This could be simplified with a `PrimitiveProxy.protoype.clone` function:
+```js
+let a = new PrimitiveProxy(...);
+let b = a.clone();
+```
+
+### `PrimitiveProxy.prototype.delete`
+
+Deleting a Primitive Proxy is not as simple as assigning `undefined` to it, because it would just trigger the setter of the Primitive Proxy.
+
+This could be done using a `PrimitiveProxy.prototype.delete` function:
+
+```js
+let a = new PrimitiveProxy(...);
+a.delete();
+console.log(a); // undefined
+```
+
 ## Questions
 
 ### Isn't it confusing not to be able to reassign a variable?
@@ -75,29 +110,8 @@ We could do something like this:
 ```js
 let a = new PrimitiveProxy(...);
 let temp = a;
-delete a;
+a.delete()
 let a = temp; // a is now a standard primitive
-```
-
-### How to copy a primitive proxy?
-
-You wrap it into another primitive proxy:
-```js
-let a = new PrimitiveProxy(...);
-let b = new PrimitiveProxy(null, {
-    set: (_target, value) => {
-        a = value;
-    },
-    get: (_target) => {
-        return a;
-    }
-})
-```
-
-Or we can imagine a `PrimitiveProxy.protoype.clone` function:
-```js
-let a = new PrimitiveProxy(...);
-let b = a.clone();
 ```
 
 ### What happens when passing a Primitive Proxy to a function?
