@@ -99,10 +99,10 @@ let b = new PrimitiveProxy(null, {
 })
 ```
 
-Or we can imagine a `clonePrimitiveProxy` function:
+Or we can imagine a `PrimitiveProxy.clone` function:
 ```js
 let a = new PrimitiveProxy(...);
-let b = clonePrimitiveProxy(a);
+let b = PrimitiveProxy.clone(a);
 ```
 
 ### What happens when passing a Primitive Proxy to a function?
@@ -130,11 +130,11 @@ console.log(myVar); // primitive:Hello
 
 console.log(myVar); // primitive:Hello
 
-(({ myVar }) => { // here, myVar is still proxy primitive
-    console.log(myVar); // primitive:Hello
-    myVar = "test";
-    console.log(myVar); // primitive:test
-})({ myVar });
+(({ value }) => { // here, value is a proxy primitive
+    console.log(value); // primitive:Hello
+    value = "test";
+    console.log(value); // primitive:test
+})({ value: PrimitiveProxy.clone(myVar) });
 
 console.log(myVar); // primitive:test
 ```
