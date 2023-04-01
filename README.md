@@ -12,7 +12,7 @@ There are two solutions:
 - React-like reactive properties use a getter to get the variable, and a function to set it.
 - Vue-like reactive properties wrap the variable into a [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy), where the value can be set and get using the `value` property.
 
-A primite proxy would allow to set and get a reactive variable seemlessly, here's an example:
+A primitive proxy would allow to set and get a reactive variable seemlessly, here's an example:
 
 ```ts
 // React
@@ -26,7 +26,7 @@ myVueVar.value = "Hello world";
 console.log(myVueVar.value);
 
 // Primitive proxy
-const myPrimitiveVar = ref("");
+let myPrimitiveVar = ref("");
 myPrimitiveVar = "Hello world";
 console.log(myPrimitiveVar);
 ```
@@ -36,7 +36,7 @@ console.log(myPrimitiveVar);
 Here is a possible implementation inspired by the [Proxy object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy), but without the prop argument of the handler `get` and `set`.
 
 ```ts
-const myVar = new PrimitiveProxy({ storedValue: "" }, {
+let myVar = new PrimitiveProxy({ storedValue: "" }, {
     set: (target, value) => {
         target.storedValue = value + " world";
     },
