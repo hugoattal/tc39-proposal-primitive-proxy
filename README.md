@@ -77,13 +77,6 @@ delete a;
 let a = temp; // a is now a standard primitive
 ```
 
-Or we can imagine a `removePrimitiveProxy` function:
-
-```js
-let a = new PrimitiveProxy(...);
-removePrimitiveProxy(a); // a is now a standard primitive
-```
-
 ### How to copy a primitive proxy?
 
 You wrap it into another primitive proxy:
@@ -99,10 +92,10 @@ let b = new PrimitiveProxy(null, {
 })
 ```
 
-Or we can imagine a `PrimitiveProxy.clone` function:
+Or we can imagine a `PrimitiveProxy.protoype.clone` function:
 ```js
 let a = new PrimitiveProxy(...);
-let b = PrimitiveProxy.clone(a);
+let b = a.clone();
 ```
 
 ### What happens when passing a Primitive Proxy to a function?
@@ -110,7 +103,7 @@ let b = PrimitiveProxy.clone(a);
 When passed to a function, a Primitive Proxy is copied like a standard primitive. If you want to pass the Primitive Proxy to a function, you must wrap it into an object.
 
 ```js
-let myVar = new PrimitiveProxy({storedValue: ""}, {
+let a = new PrimitiveProxy({storedValue: ""}, {
     set: (target, value) => {
         target.storedValue = value;
     },
@@ -119,22 +112,22 @@ let myVar = new PrimitiveProxy({storedValue: ""}, {
     }
 });
 
-myVar = "Hello";
-console.log(myVar); // primitive:Hello
+a = "Hello";
+console.log(a); // primitive:Hello
 
 ((value) => { // here, value is a standard primitive
     console.log(value); // primitive:Hello
     value = "test";
     console.log(value); // test
-})(myVar);
+})(a);
 
-console.log(myVar); // primitive:Hello
+console.log(a); // primitive:Hello
 
 (({ value }) => { // here, value is a proxy primitive
     console.log(value); // primitive:Hello
     value = "test";
     console.log(value); // primitive:test
-})({ value: PrimitiveProxy.clone(myVar) });
+})({ value: a.clone });
 
-console.log(myVar); // primitive:test
+console.log(a); // primitive:test
 ```
